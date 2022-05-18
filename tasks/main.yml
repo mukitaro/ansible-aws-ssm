@@ -1,67 +1,74 @@
 ---
-# tasks file for aws-ssm
-- name: Get CPU architecture
-  command: getconf LONG_BIT
+
+- name: Get CPU architecture.
+  ansible.builtin.command: getconf LONG_BIT
   register: cpu_arch
-  changed_when: False
-  check_mode: no
+  changed_when: false
+  check_mode: true
 
 - name: Change URL destination for 32bit arch
-  set_fact:
+  ansible.builtin.set_fact:
     url: '386'
   when: cpu_arch.stdout == '32'
 
-- name: Install pre-required packages
-  become: yes
-  become_user: root
-  package:
+- name: Install pre-required packages.
+  ansible.builtin.package:
     name: gnupg
     state: present
+  tags:
+    - install_gnupg
 
-- name: Copy GPG key
-  copy:
-    src: amazon-ssm-agent.gpg
-    dest: /tmp/amazon-ssm-agent.gpg
-
-- name: Import GPG key for Redhat Family (Amazon Linux, RHEL, and CentOS) 32/64-bit
-  become: yes
-  become_user: root
-  rpm_key:
-    key: /tmp/amazon-ssm-agent.gpg
+- name: Import GPG key for Redhat family.
+  ansible.builtin.rpm_key:
+    key: "{{ gpg_key_url }}"
+    fingerprint: "{{ gpg_key_fingerprint }}"
     state: present
+  tags:
+    - import_rpm_key
   when: ansible_os_family == 'RedHat'
 
-- name: Install rpm file for Redhat Family (Amazon Linux, RHEL, and CentOS) 32/64-bit
-  become: yes
-  become_user: root
-  yum:
+- name: Install RPM file for Redhat family.
+  ansible.builtin.yum:
     name: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_{{ url }}/amazon-ssm-agent.rpm"
+    disable_gpg_check: "{{ disable_gpg_check }}"
     state: present
-  when: ansible_os_family == 'RedHat'
+  tags:
+    - install_ssm_agent
+  register: install_result
+  retries: 3
+  until: install_result is success
+  when:
+    - ansible_os_family == "RedHat"
 
-- name: Import GPG key for Debian family 32/64-bit
-  become: yes
-  become_user: root
-  apt_key:
-    file: /tmp/amazon-ssm-agent.gpg
+- name: Import GPG key for Debian family.
+  ansible.builtin.apt_key:
+    file: "{{ gpg_key_url }}"
+    id: "{{ gpg_key_fingerprint }}"
     state: present
+  tags:
+    - import_apt_key
   when: ansible_os_family == 'Debian'
 
-- name: Install deb file for Debian family 32/64-bit
-  become: yes
-  become_user: root
-  apt:
+- name: Install deb file for Debian family.
+  ansible.builtin.apt:
     deb: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_{{ url }}/amazon-ssm-agent.deb"
-  when: ansible_os_family == 'Debian'
+  notify: restart amazon-ssm-agent
+  tags:
+    - install_ssm_agent
+  register: install_result
+  retries: 3
+  until: install_result is success
+  when: ansible_os_family == "Debian"
 
 - include: register.yml
+  tags:
+    - register_ssm_agent
   when: aws_ssm_activation_code is defined and aws_ssm_activation_id is defined
 
-- name: Register to service
-  become: yes
-  become_user: root
-  service:
+- name: Enable and start service.
+  ansible.builtin.service:
     name: amazon-ssm-agent
-    enabled: yes
-    state: started
+    enabled: true
+  tags:
+    - enable_ssm_service
   when: ansible_os_family == 'Debian'
