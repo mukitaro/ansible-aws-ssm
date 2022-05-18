@@ -24,7 +24,7 @@ galaxy_info:
         - bullseye
     - name: Ubuntu
       versions:
-        - jammy
+        - focal
 
   galaxy_tags:
     - cloud
