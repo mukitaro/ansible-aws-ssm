@@ -1,8 +1,7 @@
 AWS Systems Manager Agent
 =========
 
-[![Ansible Role](https://img.shields.io/ansible/role/17714.svg)](https://galaxy.ansible.com/deekayen/aws-ssm/)
-[![Ansible Role](https://img.shields.io/ansible/role/d/17714.svg)](https://galaxy.ansible.com/deekayen/aws-ssm/)
+[![CI](https://github.com/deekayen/ansible-aws-ssm/actions/workflows/ci.yml/badge.svg)](https://github.com/deekayen/ansible-aws-ssm/actions/workflows/ci.yml)
 
 Install AWS EC2 Systems Manager (SSM) agent
 
