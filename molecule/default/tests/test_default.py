@@ -11,6 +11,5 @@ def test_ssm_package(host):
 
 def test_ssm_files(host):
     assert host.file("/etc/amazon/ssm").is_directory
-    assert host.file("/etc/systemd/system/amazon-ssm-agent.service").is_file
     assert host.file("/usr/bin/amazon-ssm-agent").is_file
     assert host.file("/usr/bin/amazon-ssm-agent").mode == 0o755
