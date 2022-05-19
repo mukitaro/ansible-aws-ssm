@@ -42,7 +42,7 @@
 
 - name: Import GPG key for Debian family.
   ansible.builtin.apt_key:
-    file: "{{ gpg_key_url }}"
+    url: "{{ gpg_key_url }}"
     id: "{{ gpg_key_fingerprint }}"
     state: present
   tags:

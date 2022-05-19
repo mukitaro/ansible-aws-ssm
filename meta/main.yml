@@ -21,10 +21,12 @@ galaxy_info:
         - 8
     - name: Debian
       versions:
+        - buster
         - bullseye
     - name: Ubuntu
       versions:
         - focal
+        - jammy
 
   galaxy_tags:
     - cloud
