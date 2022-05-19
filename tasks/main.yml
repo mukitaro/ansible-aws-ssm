@@ -1,15 +1,9 @@
 ---
 
-- name: Get CPU architecture.
-  ansible.builtin.command: getconf LONG_BIT
-  register: cpu_arch
-  changed_when: false
-  check_mode: true
-
-- name: Change URL destination for 32bit arch
+- name: Change URL destination for 32bit arch.
   ansible.builtin.set_fact:
     url: '386'
-  when: cpu_arch.stdout == '32'
+  when: ansible_userspace_bits == '32'
 
 - name: Install pre-required packages.
   ansible.builtin.package:
