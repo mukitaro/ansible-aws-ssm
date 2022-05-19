@@ -54,10 +54,14 @@
   until: install_result is success
   when: ansible_os_family == "Debian"
 
-- include: register.yml
+- include_tasks: register.yml
   tags:
     - register_ssm_agent
-  when: aws_ssm_activation_code is defined and aws_ssm_activation_id is defined
+  when:
+    - aws_ssm_activation_code is defined
+    - not aws_ssm_activation_code == ''
+    - aws_ssm_activation_id is defined
+    - not aws_ssm_activation_id == ''
 
 - name: Enable and start service.
   ansible.builtin.service:
